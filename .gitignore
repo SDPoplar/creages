@@ -1,0 +1,6 @@
+*.swp
+
+db/*.sh
+test/
+log/
+
