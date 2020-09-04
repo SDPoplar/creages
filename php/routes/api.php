@@ -14,5 +14,15 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return '&copy; '.date( 'Y' ).', Creages';
 });
+
+$router->group( [
+    'middleware' => [ 'auth' ],
+    'prefix' => 'product',
+    //  'namespace' => 'Product'
+], function() use ( $router ) {
+    $router->get( 'my_list', 'Product@my_list' );
+    $router->get( 'pub_list', 'Product@public_list' );
+} );
+
