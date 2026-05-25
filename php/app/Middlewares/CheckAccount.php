@@ -1,7 +1,8 @@
 <?php
 namespace App\Middlewares;
 
-use App\Exceptions\Unauthorized as ErrUnauthorized;
+use Mxs\Exceptions\Runtimes\Unauthorized as ErrUnauthorized;
+use App\Exceptions\AccountCannotAuth as ErrAccountCannotAuth;
 use App\Services\Auth\AuthToken;
 use App\Services\Account\Surface as AccountService;
 
@@ -14,7 +15,7 @@ class CheckAccount implements \Mxs\Routes\MiddlewareInterface
         is_null($me) and throw ErrUnauthorized::invalid();
         $found = new AccountService()->getAccount($me->account_id);
         is_null($found) and throw ErrUnauthorized::invalid();
-        $found->isNormal() or throw ErrUnauthorized::accountStatusNotAllowed($found->status);
+        $found->isNormal() or throw ErrAccountCannotAuth::accountStatusNotAllowed($found->status);
         return $next($in);
     }
 }

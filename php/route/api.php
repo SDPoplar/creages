@@ -5,11 +5,12 @@ use App\Controllers\{
     Universe as UniverseController,
 };
 use App\Middlewares\{
+    Cors as MidCors,
     Auth as MidAuth,
     CheckAccount as MidCheckAccount,
 };
 //  mg = middleware group
-$mgCheckAccount = [MidAuth::class, MidCheckAccount::class];
+$mgCheckAccount = [MidCors::class, MidAuth::class, MidCheckAccount::class];
 
 /*
 |--------------------------------------------------------------------------
@@ -22,9 +23,10 @@ $mgCheckAccount = [MidAuth::class, MidCheckAccount::class];
 |
 */
 
-Route::post('/auth/pwd', AccountController::class, 'loginWithPwd');
-Route::post('/auth/regist', AccountController::class, 'regist');
-Route::delete('/auth', AccountController::class, 'logout')->middware(MidAuth::class);
+Route::head('/auth', AccountController::class, 'verifyToken')->middware(...$mgCheckAccount);
+Route::post('/auth/pwd', AccountController::class, 'loginWithPwd')->middware(MidCors::class);
+Route::post('/auth/regist', AccountController::class, 'regist')->middware(MidCors::class);
+Route::delete('/auth', AccountController::class, 'logout')->middware(MidCors::class, MidAuth::class);
 
 Route::put('/account/{$column}', AccountController::class, 'edit')->middware(...$mgCheckAccount);
 

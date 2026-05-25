@@ -15,22 +15,16 @@ class Surface extends \Mxs\Services\Pdo\Postgre
         return 'account';
     }
 
+    public function findByAccount(string $account): ?Instance
+    {
+        $found = empty($account) ? null : $this->getOne(F::eq('account', $account));
+        return $found ? self::dataToInstance($found) : null;
+    }
+
     public function getAccount(int $account_id): ?Instance
     {
         $found = $account_id > 0 ? $this->getOne(F::eq('id', $account_id)) : null;
-        if (empty($found)) {
-            return null;
-        }
-        //  var_dump($found); exit;
-        $status = Status::tryFrom(intval($found['status']));
-        is_null($status) and throw new ErrDataBroken(AppRunCode::AccountStatusBroken->value);
-        return new Instance(
-            intval($found['id']),
-            $found['account'],
-            $found['nickname'],
-            $found['password'],
-            $status,
-        );
+        return $found ? self::dataToInstance($found) : null;
     }
 
     public function accountExists(string $account): bool
@@ -50,5 +44,18 @@ class Surface extends \Mxs\Services\Pdo\Postgre
             return null;
         }
         return new Instance($insertId, $account, $nickname, $hashed_pwd, Status::Unverify);
+    }
+
+    private static function dataToInstance(array $data) : Instance
+    {
+        $status = Status::tryFrom(intval($data['status']));
+        is_null($status) and throw new ErrDataBroken(AppRunCode::AccountStatusBroken->value);
+        return new Instance(
+            intval($data['id']),
+            $data['account'],
+            $data['nickname'],
+            $data['password'],
+            $status,
+        );
     }
 }
