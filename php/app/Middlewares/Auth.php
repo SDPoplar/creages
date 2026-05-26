@@ -21,6 +21,7 @@ class Auth implements \Mxs\Routes\MiddlewareInterface
     {
         if ($request instanceof HttpRequest) {
             $token = $this->parseHttpToken($request);
+            app()->logger->info('setting [me] ' . gettype($token));
             $request->appendMid('me', $token);
         } else {
             $request->appendMid('me', new AuthToken('1'));
@@ -29,7 +30,7 @@ class Auth implements \Mxs\Routes\MiddlewareInterface
         return $next($request);
     }
 
-    private function parseHttpToken(HttpRequest $in): AuthToken
+    protected function parseHttpToken(HttpRequest $in): AuthToken
     {
         $tokenStr = $in->header('Authorization');
         empty($tokenStr) and throw Unauthorized::missing();

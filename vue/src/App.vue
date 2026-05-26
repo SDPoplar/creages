@@ -8,13 +8,15 @@ import author from './utils/auth';
 import VerifyToken from './apis/VerifyToken';
 import AuthorView from './views/AuthorView.vue';
 
-const authed = ref<boolean>(false)
+const authed = ref<boolean>(author.isAuthed())
 var subToken: PubSubJS.Token|null = null
 onMounted(() => {
   subToken = PubSub.subscribe(PubSubEvents.AUTH_TOKEN_CHANGED, () => {
     authed.value = author.isAuthed()
   });
-  (new VerifyToken()).call()
+  if (authed.value) {
+    (new VerifyToken()).call()
+  }
 })
 onUnmounted(() => {
   if (subToken !== null) {

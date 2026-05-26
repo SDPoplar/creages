@@ -1,21 +1,21 @@
 <?php
 namespace App\Middlewares;
 
+use Mxs\Inputs\HttpRequest;
 use Mxs\Exceptions\Runtimes\Unauthorized as ErrUnauthorized;
 use App\Exceptions\AccountCannotAuth as ErrAccountCannotAuth;
 use App\Services\Auth\AuthToken;
 use App\Services\Account\Surface as AccountService;
 
-class CheckAccount implements \Mxs\Routes\MiddlewareInterface
+class AuthVerify extends Auth
 {
     #[\Override]
-    public function handle(\Mxs\Inputs\RootInput $in, \Closure $next): mixed
+    protected function parseHttpToken(HttpRequest $in): AuthToken
     {
-        $me = (fn($e): ?AuthToken => $e instanceof AuthToken ? $e : null)($in->mid('me'));
-        is_null($me) and throw ErrUnauthorized::invalid();
+        $me = parent::parseHttpToken($in);
         $found = new AccountService()->getAccount($me->account_id);
         is_null($found) and throw ErrUnauthorized::invalid();
         $found->isNormal() or throw ErrAccountCannotAuth::accountStatusNotAllowed($found->status);
-        return $next($in);
+        return $me;
     }
 }

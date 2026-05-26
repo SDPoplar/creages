@@ -16,11 +16,16 @@ export class Api {
   protected method: string
   protected path: string
   protected params: object
+  protected dataType: string = 'application/x-www-form-urlencoded'
 
   constructor(method: string, path: string, params: object = {}) {
     this.method = method
     this.path = path
     this.params = params
+  }
+
+  protected setMultipart() {
+    this.dataType = 'multipart/form-data'
   }
 
   public async call() {
@@ -30,10 +35,11 @@ export class Api {
       data: this.params,
       responseType: 'json',
       headers: {
+        'Content-Type': this.dataType,
         'Authorization': author.getToken()
       }
     }).catch(reason => {
-      if (reason.response.status === 401) {
+      if ((typeof(reason.response) !== 'undefined') && (reason.response.status === 401)) {
         author.setToken('')
         Promise.resolve()
       } else {

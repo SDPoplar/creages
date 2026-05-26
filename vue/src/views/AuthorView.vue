@@ -1,8 +1,22 @@
 <script setup lang="ts">
+import Login from '@/apis/Login';
+import author from '@/utils/auth';
 import { ref } from 'vue';
 
-const account = ref<string>('')
+const LAST_ACCOUNT_STORAGE = 'last_auth_account'
+const account = ref<string>(localStorage.getItem(LAST_ACCOUNT_STORAGE) ?? '')
 const pwd = ref<string>('')
+function canSubmit(): boolean {
+  return account.value.length > 0 && pwd.value.length > 0
+}
+function login() {
+  (new Login(account.value, pwd.value)).call().then(resp => {
+    localStorage.setItem(LAST_ACCOUNT_STORAGE, account.value)
+    author.setToken(resp?.data.token)
+  }).catch(reason => {
+    console.log(reason)
+  })
+}
 </script>
 
 <template>
@@ -13,7 +27,7 @@ const pwd = ref<string>('')
         <input type="text" id="inAccount" class="form-control" v-model="account" />
         <label for="inPwd" class="mt-3">Password</label>
         <input type="password" id="inPwd" class="form-control" v-model="pwd" />
-        <button class="btn btn-primary mt-3 mx-auto w-50" :disabled="account.length <= 0 || pwd.length <= 0">Login</button>
+        <button type="button" class="btn btn-primary mt-3 mx-auto w-50" :disabled="!canSubmit()" @click="login">Login</button>
       </form>
     </div>
   </div>
